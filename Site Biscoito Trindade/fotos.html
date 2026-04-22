@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="description"
+    content="Catalogo da Biscoitos Trindade com carrinho, tamanhos e fechamento do pedido completo pelo WhatsApp."
+  >
+  <title>Catalogo | Biscoitos Trindade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;800&family=Manrope:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <main class="catalog-page">
+      <nav class="topbar" aria-label="Navegacao do catalogo">
+        <a class="brand" href="index.html" aria-label="Voltar para a pagina inicial">
+          <img class="brand-logo" src="assets/logo-biscoitos-trindade.png" alt="Logo Biscoitos Trindade">
+          <span class="brand-copy">
+            <strong>Biscoitos Trindade</strong>
+            <small>Catalogo de biscoitos</small>
+          </span>
+        </a>
+
+        <div class="topbar-actions">
+          <a class="button button-secondary button-small" href="index.html">Pagina inicial</a>
+          <button class="button button-primary button-small cart-trigger" type="button" data-open-cart>
+            Carrinho
+            <span class="cart-badge" data-cart-count>0</span>
+          </button>
+        </div>
+      </nav>
+
+      <section class="catalog-hero">
+        <div class="catalog-hero-copy">
+          <span class="eyebrow">Fotos e sabores</span>
+          <h1>Toque em qualquer produto para escolher o tamanho e adicionar ao carrinho.</h1>
+          <p>
+            Cada card mostra seus biscoitos reais, abre os detalhes do sabor e permite montar o pedido
+            completo antes de finalizar no WhatsApp.
+          </p>
+        </div>
+
+        <div class="catalog-hero-card">
+          <p class="card-kicker">Atendimento</p>
+          <div class="hero-preview">
+            <img src="assets/biscoito-goiabada-1.jpg" alt="Biscoitos amanteigados com recheio de goiabada">
+          </div>
+          <a class="contact-chip" data-store-whatsapp href="#" target="_blank" rel="noreferrer">
+            <span>WhatsApp</span>
+            <strong data-phone-display>(21) 98814-6262</strong>
+          </a>
+          <a class="contact-chip" data-instagram-link href="#" target="_blank" rel="noreferrer">
+            <span>Instagram</span>
+            <strong data-instagram-handle>@biscoitostrindade</strong>
+          </a>
+        </div>
+      </section>
+
+      <section class="catalog-gallery" aria-label="Galeria de biscoitos">
+        <div class="catalog-grid catalog-grid-large" data-all-products></div>
+      </section>
+
+      <section class="catalog-bottom-cta">
+        <div>
+          <span class="section-label">Pronto para vender</span>
+          <h2>Seu catalogo agora fecha o pedido inteiro pelo carrinho.</h2>
+          <p>
+            A pessoa escolhe o tamanho, adiciona varios produtos e no final envia tudo de uma vez no WhatsApp.
+          </p>
+        </div>
+
+        <div class="cta-stack">
+          <button class="button button-primary wide" type="button" data-open-cart>
+            Abrir carrinho
+          </button>
+          <a class="button button-ghost wide" href="index.html">Voltar ao inicio</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="product-modal" data-product-modal hidden>
+    <div class="product-modal-backdrop" data-close-modal></div>
+
+    <div class="product-sheet" role="dialog" aria-modal="true" aria-labelledby="catalog-product-modal-title">
+      <button class="modal-close" type="button" aria-label="Fechar detalhes do produto" data-close-modal>
+        Fechar
+      </button>
+
+      <div class="product-sheet-media">
+        <img data-modal-image src="" alt="">
+      </div>
+
+      <div class="product-sheet-copy">
+        <span class="sheet-label" data-modal-badge></span>
+        <h2 id="catalog-product-modal-title" data-modal-title></h2>
+        <p class="sheet-flavor" data-modal-flavor></p>
+        <p class="sheet-description" data-modal-description></p>
+
+        <div class="purchase-builder">
+          <div class="builder-block">
+            <p class="builder-label">Escolha o tamanho</p>
+            <div class="size-list" data-size-options></div>
+          </div>
+
+          <div class="builder-block">
+            <p class="builder-label">Quantidade</p>
+            <div class="quantity-picker" aria-label="Quantidade do produto">
+              <button class="quantity-button" type="button" data-quantity-change="-1" aria-label="Diminuir quantidade">
+                -
+              </button>
+              <span class="quantity-value" data-quantity-value>1</span>
+              <button class="quantity-button" type="button" data-quantity-change="1" aria-label="Aumentar quantidade">
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-actions">
+          <button class="button button-primary wide" type="button" data-add-to-cart>
+            Adicionar ao carrinho
+          </button>
+          <button class="button button-secondary wide" type="button" data-open-cart>
+            Ver carrinho
+          </button>
+          <button class="button button-ghost wide" type="button" data-close-modal>
+            Sair desta aba
+          </button>
+        </div>
+
+        <p class="sheet-feedback" data-modal-feedback aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-drawer" data-cart-drawer hidden>
+    <div class="cart-backdrop" data-close-cart></div>
+
+    <aside class="cart-sheet" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <button class="modal-close cart-close" type="button" aria-label="Fechar carrinho" data-close-cart>
+        Fechar
+      </button>
+
+      <div class="cart-header">
+        <span class="sheet-label">Seu carrinho</span>
+        <h2 id="cart-title">Monte seu pedido completo</h2>
+        <p>
+          Confira os itens escolhidos, ajuste o pedido como quiser e finalize tudo em uma unica
+          mensagem no WhatsApp.
+        </p>
+      </div>
+
+      <div class="cart-status">
+        <article class="summary-chip">
+          <span>Itens</span>
+          <strong data-cart-total-items>0</strong>
+        </article>
+        <article class="summary-chip">
+          <span>Sabores</span>
+          <strong data-cart-total-lines>0</strong>
+        </article>
+      </div>
+
+      <div class="cart-empty" data-cart-empty>
+        Seu carrinho esta vazio. Escolha um biscoito, selecione o tamanho e adicione ao pedido.
+      </div>
+
+      <section class="cart-overview" data-cart-overview-wrapper hidden>
+        <p class="builder-label">Resumo do pedido</p>
+        <div class="cart-overview-list" data-cart-overview></div>
+      </section>
+
+      <div class="cart-items" data-cart-items></div>
+
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Total de itens</span>
+          <strong data-cart-total-items>0</strong>
+        </div>
+        <div class="summary-row">
+          <span>Sabores no pedido</span>
+          <strong data-cart-total-lines>0</strong>
+        </div>
+
+        <div class="cart-actions">
+          <button class="button button-secondary wide" type="button" data-close-cart>
+            Continuar comprando
+          </button>
+          <button class="button button-ghost wide" type="button" data-clear-cart>
+            Limpar carrinho
+          </button>
+          <a class="button button-primary wide" data-cart-checkout href="#" target="_blank" rel="noreferrer">
+            Comprar no WhatsApp
+          </a>
+        </div>
+
+        <p class="checkout-note">
+          O WhatsApp vai abrir com o pedido todo montado na mensagem.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <button class="floating-cart" type="button" data-open-cart aria-label="Abrir carrinho">
+    <span>Carrinho</span>
+    <strong data-cart-count>0</strong>
+  </button>
+
+  <script src="script.js"></script>
+</body>
+</html>
