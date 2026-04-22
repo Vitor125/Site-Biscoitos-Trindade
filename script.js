@@ -7,7 +7,7 @@ const STORE = {
   genericMessage: "Ola! Vim pelo site da Biscoitos Trindade e quero fazer um pedido."
 };
 
-const ASSET_VERSION = "20260422-1";
+const ASSET_VERSION = "20260422-2";
 const CART_STORAGE_KEY = "biscoitos-trindade-cart";
 
 const SIZE_OPTIONS = [
@@ -212,7 +212,7 @@ function createProductCard(product) {
   return `
     <button class="product-card" type="button" data-product-id="${product.id}">
       <div class="product-media">
-        <img src="${product.image}" alt="${product.name}" loading="lazy">
+        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
       </div>
       <div class="product-copy">
         <div class="product-topline">
@@ -246,7 +246,7 @@ function createCartOverviewItem(entry) {
           <span>${entry.quantity} item(ns)</span>
         </div>
         <button class="cart-remove-summary" type="button" data-remove-cart-flavor="${entry.productId}">
-          Excluir sabor
+          Excluir sabor inteiro
         </button>
       </div>
       <small>${entry.sizes.join(" • ")}</small>
@@ -261,18 +261,39 @@ function createCartItem(item, index) {
   return `
     <article class="cart-item">
       <div class="cart-item-media">
-        <img src="${product.image}" alt="${product.name}" loading="lazy">
+        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
       </div>
 
       <div class="cart-item-copy">
         <h3>${product.name}</h3>
         <p>${size.label} - ${size.weight}</p>
         <p>Quantidade: ${item.quantity}</p>
+        <div class="cart-item-controls">
+          <button
+            class="cart-stepper"
+            type="button"
+            data-change-cart-item="${index}"
+            data-change-cart-amount="-1"
+          >
+            Remover 1
+          </button>
+          <span class="cart-item-quantity">${item.quantity} unidade(s)</span>
+          <button
+            class="cart-stepper cart-stepper-add"
+            type="button"
+            data-change-cart-item="${index}"
+            data-change-cart-amount="1"
+          >
+            Adicionar 1
+          </button>
+        </div>
       </div>
 
-      <button class="cart-remove" type="button" data-remove-cart-item="${index}">
-        Excluir item
-      </button>
+      <div class="cart-item-actions">
+        <button class="cart-remove" type="button" data-remove-cart-item="${index}">
+          Excluir item inteiro
+        </button>
+      </div>
     </article>
   `;
 }
@@ -502,6 +523,23 @@ function removeCartItem(index) {
   updateCartUI();
 }
 
+function changeCartItemQuantity(index, amount) {
+  if (index < 0 || index >= cart.length) {
+    return;
+  }
+
+  const nextQuantity = cart[index].quantity + amount;
+
+  if (nextQuantity <= 0) {
+    removeCartItem(index);
+    return;
+  }
+
+  cart[index].quantity = clampQuantity(nextQuantity);
+  saveCart();
+  updateCartUI();
+}
+
 function removeCartFlavor(productId) {
   if (!productId) {
     return;
@@ -585,6 +623,15 @@ function initEvents() {
     const removeButton = event.target.closest("[data-remove-cart-item]");
     if (removeButton) {
       removeCartItem(Number.parseInt(removeButton.dataset.removeCartItem, 10));
+      return;
+    }
+
+    const changeItemButton = event.target.closest("[data-change-cart-item]");
+    if (changeItemButton) {
+      changeCartItemQuantity(
+        Number.parseInt(changeItemButton.dataset.changeCartItem, 10),
+        Number.parseInt(changeItemButton.dataset.changeCartAmount, 10)
+      );
       return;
     }
 
