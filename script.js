@@ -298,6 +298,28 @@ function createCartItem(item, index) {
   `;
 }
 
+function createCartOverviewItem(entry) {
+  return `
+    <article class="cart-overview-item">
+      <div class="cart-overview-head">
+        <div class="cart-overview-meta">
+          <strong>${entry.name}</strong>
+          <span>${entry.quantity} item(ns)</span>
+        </div>
+        <div class="cart-overview-actions">
+          <button class="cart-stepper cart-stepper-summary" type="button" data-remove-cart-flavor-unit="${entry.productId}">
+            Remover 1
+          </button>
+          <button class="cart-remove-summary" type="button" data-remove-cart-flavor="${entry.productId}">
+            Excluir sabor inteiro
+          </button>
+        </div>
+      </div>
+      <small>${entry.sizes.join(" | ")}</small>
+    </article>
+  `;
+}
+
 function renderProducts() {
   const featuredGrid = document.querySelector("[data-featured-products]");
   if (featuredGrid) {
@@ -550,6 +572,19 @@ function removeCartFlavor(productId) {
   updateCartUI();
 }
 
+function removeSingleFlavorUnit(productId) {
+  if (!productId) {
+    return;
+  }
+
+  const targetIndex = cart.findIndex((item) => item.productId === productId);
+  if (targetIndex === -1) {
+    return;
+  }
+
+  changeCartItemQuantity(targetIndex, -1);
+}
+
 function clearCart() {
   cart = [];
   saveCart();
@@ -638,6 +673,12 @@ function initEvents() {
     const removeFlavorButton = event.target.closest("[data-remove-cart-flavor]");
     if (removeFlavorButton) {
       removeCartFlavor(removeFlavorButton.dataset.removeCartFlavor);
+      return;
+    }
+
+    const removeFlavorUnitButton = event.target.closest("[data-remove-cart-flavor-unit]");
+    if (removeFlavorUnitButton) {
+      removeSingleFlavorUnit(removeFlavorUnitButton.dataset.removeCartFlavorUnit);
       return;
     }
 

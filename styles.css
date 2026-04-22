@@ -1008,6 +1008,13 @@ section[id] {
   gap: 4px;
 }
 
+.cart-overview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .cart-overview-head strong {
   font-family: "Fraunces", serif;
   font-size: 1rem;
@@ -1029,6 +1036,10 @@ section[id] {
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.cart-stepper-summary {
+  min-height: 38px;
 }
 
 .cart-items {
@@ -1580,7 +1591,16 @@ section[id] {
     gap: 10px;
   }
 
+  .cart-overview-actions,
   .cart-remove-summary {
+    width: 100%;
+  }
+
+  .cart-overview-actions {
+    justify-content: stretch;
+  }
+
+  .cart-stepper-summary {
     width: 100%;
   }
 
