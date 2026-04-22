@@ -7,6 +7,7 @@ const STORE = {
   genericMessage: "Ola! Vim pelo site da Biscoitos Trindade e quero fazer um pedido."
 };
 
+const ASSET_VERSION = "20260422-1";
 const CART_STORAGE_KEY = "biscoitos-trindade-cart";
 
 const SIZE_OPTIONS = [
@@ -15,42 +16,55 @@ const SIZE_OPTIONS = [
   { id: "pequeno", label: "Pequeno", weight: "125 gramas" }
 ];
 
+function buildAssetPath(fileName) {
+  return `${fileName}?v=${ASSET_VERSION}`;
+}
+
 const PRODUCTS = [
   {
-    id: "casadinho-goiabada",
-    name: "Casadinho com Goiabada",
-    badge: "Mais pedido",
-    flavor: "Sabor: amanteigado com recheio de goiabada",
-    description:
-      "Biscoito amanteigado delicado, com recheio de goiabada e textura leve para acompanhar cafe, cha ou servir em encomendas.",
-    image: "assets/biscoito-goiabada-1.jpg"
-  },
-  {
-    id: "biscoito-chocolate",
-    name: "Biscoito de Chocolate",
+    id: "chocolate-belga",
+    name: "Chocolate Belga",
     badge: "Chocolate",
-    flavor: "Sabor: chocolate com recheio cremoso",
+    flavor: "Sabor: chocolate belga",
     description:
-      "Versao de chocolate com visual em espiral e recheio cremoso, perfeita para quem gosta de um biscoito marcante e docinho.",
-    image: "assets/biscoito-chocolate.jpg"
+      "Biscoito de chocolate com recheio cremoso, ideal para quem gosta de um sabor mais intenso e marcante.",
+    image: buildAssetPath("chocolate-belga.jpg")
   },
   {
-    id: "rosquinha-amanteigada",
-    name: "Rosquinha Amanteigada",
-    badge: "Classico",
-    flavor: "Sabor: amanteigado tradicional",
-    description:
-      "Rosquinha leve e sequinha, com sabor amanteigado suave, ideal para servir em casa, vender por encomenda ou montar kits.",
-    image: "assets/biscoito-rosquinha.jpg"
-  },
-  {
-    id: "amanteigado-goiabada",
-    name: "Amanteigado com Goiabada",
+    id: "goiabinha-tradicional",
+    name: "Goiabinha Tradicional",
     badge: "Tradicional",
-    flavor: "Sabor: amanteigado recheado com goiabada",
+    flavor: "Sabor: goiabinha tradicional",
     description:
-      "Biscoito redondinho amanteigado, recheado com goiabada, com aparencia delicada e sabor caseiro para qualquer hora do dia.",
-    image: "assets/biscoito-goiabada-2.jpg"
+      "Biscoito amanteigado com recheio de goiabada, feito na versao tradicional para quem ama o classico.",
+    image: buildAssetPath("goiabinha-tradicional.jpg")
+  },
+  {
+    id: "rosquinha-leite-condensado",
+    name: "Rosquinha de Leite Condensado",
+    badge: "Rosquinha",
+    flavor: "Sabor: rosquinha de leite condensado",
+    description:
+      "Rosquinha delicada e macia, com um sabor suave de leite condensado que combina com cafe e cha.",
+    image: buildAssetPath("rosquinha-leite-condensado.jpg")
+  },
+  {
+    id: "goiabinha-massa-de-nata",
+    name: "Goiabinha com Massa de Nata",
+    badge: "Massa de nata",
+    flavor: "Sabor: goiabinha com massa de nata",
+    description:
+      "Goiabinha com massa mais delicada e sabor de nata, trazendo um toque especial e bem caseiro.",
+    image: buildAssetPath("goiabinha-massa-de-nata.jpg")
+  },
+  {
+    id: "goiabinha-massa-leite-condensado",
+    name: "Goiabinha com Massa de Leite Condensado",
+    badge: "Massa de leite condensado",
+    flavor: "Sabor: goiabinha com massa de leite condensado",
+    description:
+      "Versao recheada com goiabada e massa de leite condensado, com textura macia e sabor mais adocicado.",
+    image: buildAssetPath("goiabinha-massa-leite-condensado.jpg")
   }
 ];
 
