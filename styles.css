@@ -493,6 +493,20 @@ section[id] {
   font-size: 1.05rem;
 }
 
+.support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 250, 242, 0.94);
+  border: 1px solid rgba(109, 58, 30, 0.12);
+  color: var(--cocoa);
+  font-weight: 800;
+}
+
 .section {
   padding-top: 36px;
   padding-bottom: 36px;
@@ -1518,20 +1532,27 @@ section[id] {
   }
 
   .product-sheet {
+    display: block;
     width: 100%;
     max-height: calc(100dvh - 10px);
     border-radius: 28px 28px 0 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .product-sheet-media {
     min-height: 240px;
   }
 
+  .product-sheet-copy {
+    overflow: visible;
+  }
+
   .sheet-actions {
-    position: sticky;
-    bottom: -1px;
-    padding-top: 12px;
-    background: linear-gradient(180deg, rgba(255, 250, 242, 0) 0%, rgba(255, 250, 242, 0.98) 34%);
+    position: static;
+    padding-top: 0;
+    background: none;
   }
 
   .footer {

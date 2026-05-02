@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fbf4ea">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Painel | Biscoitos Trindade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Manrope:wght@400;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css?v=20260501-1">
+  <link rel="stylesheet" href="admin.css?v=20260501-1">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <section class="admin-login-card" data-admin-login-screen>
+      <div class="admin-login-copy">
+        <span class="section-label">Painel privado</span>
+        <h1>Biscoitos Trindade</h1>
+        <p>
+          Entre com a sua senha para atualizar sabores, controlar estoque e acompanhar os pedidos
+          enviados pelo site.
+        </p>
+      </div>
+
+      <form class="admin-login-form" data-admin-login-form>
+        <label class="admin-field">
+          <span>Senha de acesso</span>
+          <input type="password" name="passcode" autocomplete="current-password" required>
+        </label>
+
+        <button class="button button-primary wide" type="submit">Entrar no dashboard</button>
+        <p class="admin-feedback" data-admin-login-feedback aria-live="polite"></p>
+        <small class="admin-note">
+          Bloqueio temporario por senha. Quando voce ligar o Firebase Auth, esse acesso pode virar
+          login real sem mexer no painel.
+        </small>
+      </form>
+    </section>
+
+    <main class="admin-panel" data-admin-panel hidden>
+      <header class="admin-header">
+        <div>
+          <span class="section-label">Dashboard</span>
+          <h1>Biscoitos Trindade</h1>
+          <p>Gerencie sabores, disponibilidade e pedidos enviados pelo site.</p>
+        </div>
+
+        <div class="admin-header-actions">
+          <span class="admin-mode-chip" data-admin-mode-chip>Modo local pronto para Firebase</span>
+          <a class="button button-secondary button-small" href="index.html" target="_blank" rel="noreferrer">
+            Ver site
+          </a>
+          <button class="button button-ghost button-small" type="button" data-admin-logout>
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <section class="admin-metrics">
+        <article class="admin-metric-card">
+          <span>Sabores cadastrados</span>
+          <strong data-metric-total-products>0</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>Sabores visiveis</span>
+          <strong data-metric-visible-products>0</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>Ocultos ou sem estoque</span>
+          <strong data-metric-hidden-products>0</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>Pedidos enviados pelo site</span>
+          <strong data-metric-total-orders>0</strong>
+        </article>
+      </section>
+
+      <section class="admin-grid">
+        <article class="admin-card admin-form-card">
+          <div class="admin-card-head">
+            <div>
+              <span class="card-kicker">Cadastro</span>
+              <h2>Criar ou editar sabor</h2>
+            </div>
+            <button class="button button-secondary button-small" type="button" data-admin-clear-form>
+              Limpar
+            </button>
+          </div>
+
+          <form class="admin-product-form" data-admin-product-form>
+            <input type="hidden" name="productId">
+            <input type="hidden" name="currentImage">
+
+            <label class="admin-field">
+              <span>Nome do sabor</span>
+              <input type="text" name="name" placeholder="Ex.: Chocolate Belga" required>
+            </label>
+
+            <div class="admin-form-row">
+              <label class="admin-field">
+                <span>Selo pequeno</span>
+                <input type="text" name="badge" placeholder="Ex.: Chocolate">
+              </label>
+
+              <label class="admin-field">
+                <span>Disponiveis</span>
+                <input type="number" name="inventory" min="0" placeholder="Ex.: 20">
+              </label>
+            </div>
+
+            <label class="admin-field">
+              <span>Texto curto do sabor</span>
+              <input type="text" name="flavor" placeholder="Ex.: Sabor: chocolate belga" required>
+            </label>
+
+            <label class="admin-field">
+              <span>Descricao</span>
+              <textarea name="description" rows="4" placeholder="Conte um pouco sobre esse biscoito." required></textarea>
+            </label>
+
+            <label class="admin-field">
+              <span>Enviar nova foto</span>
+              <input type="file" name="imageFile" accept="image/*">
+            </label>
+
+            <label class="admin-field">
+              <span>Ou usar link da imagem</span>
+              <input type="url" name="imageUrl" placeholder="https://...">
+            </label>
+
+            <div class="admin-image-preview" data-admin-image-preview>
+              <span>Preview da foto do sabor</span>
+            </div>
+
+            <label class="admin-checkbox">
+              <input type="checkbox" name="hidden">
+              <span>Comecar oculto no catalogo</span>
+            </label>
+
+            <button class="button button-primary wide" type="submit">Salvar sabor</button>
+            <p class="admin-feedback" data-admin-form-feedback aria-live="polite"></p>
+          </form>
+        </article>
+
+        <article class="admin-card admin-list-card">
+          <div class="admin-card-head">
+            <div>
+              <span class="card-kicker">Catalogo</span>
+              <h2>Sabores cadastrados</h2>
+            </div>
+          </div>
+
+          <div class="admin-product-list" data-admin-product-list></div>
+        </article>
+      </section>
+
+      <section class="admin-card admin-orders-card">
+        <div class="admin-card-head">
+          <div>
+            <span class="card-kicker">Pedidos</span>
+            <h2>Historico de pedidos enviados</h2>
+          </div>
+        </div>
+
+        <div class="admin-order-list" data-admin-order-list></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app-config.js"></script>
+  <script src="trindade-store.js"></script>
+  <script src="admin.js?v=20260501-1"></script>
+</body>
+</html>

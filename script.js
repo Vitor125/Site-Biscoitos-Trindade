@@ -7,65 +7,13 @@ const STORE = {
   genericMessage: "Ola! Vim pelo site da Biscoitos Trindade e quero fazer um pedido."
 };
 
-const ASSET_VERSION = "20260422-2";
+const ASSET_VERSION = "20260501-1";
 const CART_STORAGE_KEY = "biscoitos-trindade-cart";
 
 const SIZE_OPTIONS = [
   { id: "grande", label: "Grande", weight: "500 gramas" },
   { id: "medio", label: "Medio", weight: "250 gramas" },
   { id: "pequeno", label: "Pequeno", weight: "125 gramas" }
-];
-
-function buildAssetPath(fileName) {
-  return `${fileName}?v=${ASSET_VERSION}`;
-}
-
-const PRODUCTS = [
-  {
-    id: "chocolate-belga",
-    name: "Chocolate Belga",
-    badge: "Chocolate",
-    flavor: "Sabor: chocolate belga",
-    description:
-      "Biscoito de chocolate com recheio cremoso, ideal para quem gosta de um sabor mais intenso e marcante.",
-    image: buildAssetPath("chocolate-belga.jpg")
-  },
-  {
-    id: "goiabinha-tradicional",
-    name: "Goiabinha Tradicional",
-    badge: "Tradicional",
-    flavor: "Sabor: goiabinha tradicional",
-    description:
-      "Biscoito amanteigado com recheio de goiabada, feito na versao tradicional para quem ama o classico.",
-    image: buildAssetPath("goiabinha-tradicional.jpg")
-  },
-  {
-    id: "rosquinha-leite-condensado",
-    name: "Rosquinha de Leite Condensado",
-    badge: "Rosquinha",
-    flavor: "Sabor: rosquinha de leite condensado",
-    description:
-      "Rosquinha delicada e macia, com um sabor suave de leite condensado que combina com cafe e cha.",
-    image: buildAssetPath("rosquinha-leite-condensado.jpg")
-  },
-  {
-    id: "goiabinha-massa-de-nata",
-    name: "Goiabinha com Massa de Nata",
-    badge: "Massa de nata",
-    flavor: "Sabor: goiabinha com massa de nata",
-    description:
-      "Goiabinha com massa mais delicada e sabor de nata, trazendo um toque especial e bem caseiro.",
-    image: buildAssetPath("goiabinha-massa-de-nata.jpg")
-  },
-  {
-    id: "goiabinha-massa-leite-condensado",
-    name: "Goiabinha com Massa de Leite Condensado",
-    badge: "Massa de leite condensado",
-    flavor: "Sabor: goiabinha com massa de leite condensado",
-    description:
-      "Versao recheada com goiabada e massa de leite condensado, com textura macia e sabor mais adocicado.",
-    image: buildAssetPath("goiabinha-massa-leite-condensado.jpg")
-  }
 ];
 
 const MODAL_STATE = {
@@ -80,8 +28,38 @@ function buildWhatsAppLink(message) {
   return `https://wa.me/${STORE.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
 
+function buildAssetPath(fileName) {
+  if (!fileName) {
+    return "";
+  }
+
+  if (/^(data:|https?:|blob:)/i.test(fileName)) {
+    return fileName;
+  }
+
+  const sanitizedFileName = String(fileName).replace(/\?v=.*$/, "");
+  return `${sanitizedFileName}?v=${ASSET_VERSION}`;
+}
+
+function getCatalogProducts() {
+  if (!window.TrindadeStore) {
+    return [];
+  }
+
+  return window.TrindadeStore.getVisibleProducts().map((product) => {
+    return {
+      ...product,
+      image: buildAssetPath(product.image),
+      badge: product.badge || "Artesanal",
+      flavor: product.flavor || `Sabor: ${product.name.toLowerCase()}`,
+      description:
+        product.description || "Biscoito artesanal feito com carinho para a sua encomenda."
+    };
+  });
+}
+
 function getProductById(productId) {
-  return PRODUCTS.find((product) => product.id === productId) || null;
+  return getCatalogProducts().find((product) => product.id === productId) || null;
 }
 
 function getSizeById(sizeId) {
@@ -245,11 +223,16 @@ function createCartOverviewItem(entry) {
           <strong>${entry.name}</strong>
           <span>${entry.quantity} item(ns)</span>
         </div>
-        <button class="cart-remove-summary" type="button" data-remove-cart-flavor="${entry.productId}">
-          Excluir sabor inteiro
-        </button>
+        <div class="cart-overview-actions">
+          <button class="cart-stepper cart-stepper-summary" type="button" data-remove-cart-flavor-unit="${entry.productId}">
+            Remover 1
+          </button>
+          <button class="cart-remove-summary" type="button" data-remove-cart-flavor="${entry.productId}">
+            Excluir sabor inteiro
+          </button>
+        </div>
       </div>
-      <small>${entry.sizes.join(" • ")}</small>
+      <small>${entry.sizes.join(" | ")}</small>
     </article>
   `;
 }
@@ -298,37 +281,17 @@ function createCartItem(item, index) {
   `;
 }
 
-function createCartOverviewItem(entry) {
-  return `
-    <article class="cart-overview-item">
-      <div class="cart-overview-head">
-        <div class="cart-overview-meta">
-          <strong>${entry.name}</strong>
-          <span>${entry.quantity} item(ns)</span>
-        </div>
-        <div class="cart-overview-actions">
-          <button class="cart-stepper cart-stepper-summary" type="button" data-remove-cart-flavor-unit="${entry.productId}">
-            Remover 1
-          </button>
-          <button class="cart-remove-summary" type="button" data-remove-cart-flavor="${entry.productId}">
-            Excluir sabor inteiro
-          </button>
-        </div>
-      </div>
-      <small>${entry.sizes.join(" | ")}</small>
-    </article>
-  `;
-}
-
 function renderProducts() {
+  const products = getCatalogProducts();
+
   const featuredGrid = document.querySelector("[data-featured-products]");
   if (featuredGrid) {
-    featuredGrid.innerHTML = PRODUCTS.slice(0, 3).map(createProductCard).join("");
+    featuredGrid.innerHTML = products.slice(0, 3).map(createProductCard).join("");
   }
 
   const allProductsGrid = document.querySelector("[data-all-products]");
   if (allProductsGrid) {
-    allProductsGrid.innerHTML = PRODUCTS.map(createProductCard).join("");
+    allProductsGrid.innerHTML = products.map(createProductCard).join("");
   }
 }
 
@@ -600,12 +563,22 @@ function checkoutCart(event) {
     return;
   }
 
+  if (window.TrindadeStore && typeof window.TrindadeStore.registerOrder === "function") {
+    window.TrindadeStore.registerOrder(cart);
+  }
+
   const checkoutUrl = buildWhatsAppLink(buildCartMessage());
   const openedWindow = window.open(checkoutUrl, "_blank", "noopener,noreferrer");
 
   if (!openedWindow) {
     window.location.href = checkoutUrl;
   }
+}
+
+function refreshCatalogFromStore() {
+  cart = readCart();
+  renderProducts();
+  updateCartUI();
 }
 
 function initEvents() {
@@ -701,13 +674,14 @@ function initEvents() {
   });
 
   window.addEventListener("storage", (event) => {
-    if (event.key !== CART_STORAGE_KEY) {
-      return;
+    if (event.key === CART_STORAGE_KEY) {
+      cart = readCart();
+      updateCartUI();
     }
-
-    cart = readCart();
-    updateCartUI();
   });
+
+  window.addEventListener("trindade:products-updated", refreshCatalogFromStore);
+  window.addEventListener("trindade:dashboard-updated", updateCartUI);
 }
 
 function initSite() {
