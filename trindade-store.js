@@ -116,6 +116,20 @@
     return Number.isNaN(parsedValue) ? null : Math.max(0, parsedValue);
   }
 
+  function normalizeBoolean(value) {
+    if (typeof value === "string") {
+      const normalizedValue = value.trim().toLowerCase();
+      if (normalizedValue === "true") {
+        return true;
+      }
+      if (normalizedValue === "false" || normalizedValue === "") {
+        return false;
+      }
+    }
+
+    return Boolean(value);
+  }
+
   function normalizeProduct(product, fallbackId) {
     if (!product || typeof product !== "object") {
       return null;
@@ -139,10 +153,10 @@
       flavor,
       description,
       image,
-      hidden: Boolean(product.hidden),
+      hidden: normalizeBoolean(product.hidden),
       inventory: normalizeInventory(product.inventory),
       createdAt: product.createdAt || nowIso(),
-      updatedAt: nowIso()
+      updatedAt: product.updatedAt || nowIso()
     };
   }
 

@@ -298,18 +298,31 @@ function renderDynamicPreview(products) {
   previewImage.alt = previewProduct.name;
 }
 
+function createEmptyCatalogState() {
+  return `
+    <article class="catalog-empty-state">
+      <h3>Estamos atualizando os sabores</h3>
+      <p>Volte em instantes ou fale conosco no WhatsApp para saber o que esta disponivel hoje.</p>
+    </article>
+  `;
+}
+
 function renderProducts() {
   const products = getCatalogProducts();
   renderDynamicPreview(products);
 
   const featuredGrid = document.querySelector("[data-featured-products]");
   if (featuredGrid) {
-    featuredGrid.innerHTML = products.slice(0, 3).map(createProductCard).join("");
+    featuredGrid.innerHTML = products.length
+      ? products.slice(0, 3).map(createProductCard).join("")
+      : createEmptyCatalogState();
   }
 
   const allProductsGrid = document.querySelector("[data-all-products]");
   if (allProductsGrid) {
-    allProductsGrid.innerHTML = products.map(createProductCard).join("");
+    allProductsGrid.innerHTML = products.length
+      ? products.map(createProductCard).join("")
+      : createEmptyCatalogState();
   }
 }
 
@@ -700,6 +713,13 @@ function initEvents() {
 
   window.addEventListener("trindade:products-updated", refreshCatalogFromStore);
   window.addEventListener("trindade:dashboard-updated", updateCartUI);
+  window.addEventListener("focus", refreshCatalogFromStore);
+  window.addEventListener("pageshow", refreshCatalogFromStore);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      refreshCatalogFromStore();
+    }
+  });
 }
 
 function initSite() {
