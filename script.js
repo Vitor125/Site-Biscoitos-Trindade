@@ -281,8 +281,26 @@ function createCartItem(item, index) {
   `;
 }
 
+function renderDynamicPreview(products) {
+  const previewImage = document.querySelector("[data-dynamic-preview-image]");
+  if (!previewImage) {
+    return;
+  }
+
+  const previewProduct = products[0] || null;
+  if (!previewProduct) {
+    previewImage.removeAttribute("src");
+    previewImage.alt = "";
+    return;
+  }
+
+  previewImage.src = previewProduct.image;
+  previewImage.alt = previewProduct.name;
+}
+
 function renderProducts() {
   const products = getCatalogProducts();
+  renderDynamicPreview(products);
 
   const featuredGrid = document.querySelector("[data-featured-products]");
   if (featuredGrid) {
