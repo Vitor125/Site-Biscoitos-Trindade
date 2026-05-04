@@ -82,6 +82,26 @@
   resize: vertical;
 }
 
+.admin-stock-group {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid rgba(109, 58, 30, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 250, 242, 0.76);
+}
+
+.admin-stock-group legend {
+  padding: 0 10px;
+  color: var(--cocoa);
+  font-weight: 800;
+}
+
+.admin-stock-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .admin-checkbox {
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -259,6 +279,16 @@
 .admin-status-badge.is-hidden {
   background: rgba(185, 88, 45, 0.1);
   color: var(--accent);
+}
+
+.admin-status-badge.is-empty {
+  background: rgba(255, 231, 224, 0.94);
+  color: #8a2f22;
+}
+
+.admin-status-badge.is-neutral {
+  background: rgba(255, 250, 242, 0.94);
+  color: var(--muted);
 }
 
 .admin-product-actions {

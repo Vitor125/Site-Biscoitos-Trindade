@@ -7,7 +7,7 @@ const STORE = {
   genericMessage: "Ola! Vim pelo site da Biscoitos Trindade e quero fazer um pedido."
 };
 
-const ASSET_VERSION = "20260501-1";
+const ASSET_VERSION = "20260503-2";
 const CART_STORAGE_KEY = "biscoitos-trindade-cart";
 
 const SIZE_OPTIONS = [
@@ -64,6 +64,85 @@ function getProductById(productId) {
 
 function getSizeById(sizeId) {
   return SIZE_OPTIONS.find((size) => size.id === sizeId) || null;
+}
+
+function getSizeInventoryValue(product, sizeId) {
+  const rawValue = product && product.inventoryBySize ? product.inventoryBySize[sizeId] : null;
+  return Number.isInteger(rawValue) ? rawValue : rawValue === 0 ? 0 : null;
+}
+
+function getCartQuantityForSize(productId, sizeId) {
+  return cart.reduce((total, item) => {
+    if (item.productId !== productId || item.sizeId !== sizeId) {
+      return total;
+    }
+
+    return total + item.quantity;
+  }, 0);
+}
+
+function getSizeInventoryPresentation(product, sizeId, subtractCartItems = false) {
+  const configuredInventory = getSizeInventoryValue(product, sizeId);
+  const cartOffset = subtractCartItems && product ? getCartQuantityForSize(product.id, sizeId) : 0;
+  const availableInventory =
+    configuredInventory === null ? null : Math.max(0, configuredInventory - cartOffset);
+
+  if (availableInventory === null) {
+    return {
+      text: "Sob consulta",
+      className: " is-unknown",
+      isAvailable: true,
+      availableInventory: null
+    };
+  }
+
+  if (availableInventory <= 0) {
+    return {
+      text: "Indisponivel",
+      className: " is-empty",
+      isAvailable: false,
+      availableInventory: 0
+    };
+  }
+
+  const inventoryLabel =
+    availableInventory === 1 ? "1 disponivel" : `${availableInventory} disponiveis`;
+
+  return {
+    text: inventoryLabel,
+    className: " is-available",
+    isAvailable: true,
+    availableInventory
+  };
+}
+
+function hasAnyAvailableSize(product) {
+  return SIZE_OPTIONS.some((size) => getSizeInventoryPresentation(product, size.id, true).isAvailable);
+}
+
+function getFirstAvailableSizeId(product) {
+  const availableSize = SIZE_OPTIONS.find((size) => {
+    return getSizeInventoryPresentation(product, size.id, true).isAvailable;
+  });
+
+  return availableSize ? availableSize.id : SIZE_OPTIONS[0].id;
+}
+
+function getSizeWeightTag(size) {
+  return String(size.weight).replace(" gramas", "g");
+}
+
+function createSizeAvailabilityMarkup(product, subtractCartItems = false) {
+  return SIZE_OPTIONS.map((size) => {
+    const inventory = getSizeInventoryPresentation(product, size.id, subtractCartItems);
+
+    return `
+      <span class="stock-chip${inventory.className}">
+        <strong>${getSizeWeightTag(size)}</strong>
+        <small>${inventory.text}</small>
+      </span>
+    `;
+  }).join("");
 }
 
 function clampQuantity(value) {
@@ -199,18 +278,28 @@ function createProductCard(product) {
         </div>
         <h3 class="product-title">${product.name}</h3>
         <p>${product.flavor}</p>
+        <div class="product-stock-group">
+          <span class="product-stock-heading">Disponibilidade por tamanho</span>
+          <div class="product-stock-list">
+            ${createSizeAvailabilityMarkup(product)}
+          </div>
+        </div>
       </div>
     </button>
   `;
 }
 
-function createSizeOption(size) {
-  const selectedClass = MODAL_STATE.sizeId === size.id ? " is-selected" : "";
+function createSizeOption(product, size) {
+  const inventory = getSizeInventoryPresentation(product, size.id, true);
+  const selectedClass = MODAL_STATE.sizeId === size.id && inventory.isAvailable ? " is-selected" : "";
+  const unavailableClass = inventory.isAvailable ? "" : " is-unavailable";
+  const disabledAttribute = inventory.isAvailable ? "" : " disabled";
 
   return `
-    <button class="size-option${selectedClass}" type="button" data-size-option="${size.id}">
+    <button class="size-option${selectedClass}${unavailableClass}" type="button" data-size-option="${size.id}"${disabledAttribute}>
       <strong>${size.label}</strong>
       <span>${size.weight}</span>
+      <small class="size-option-stock${inventory.className}">${inventory.text}</small>
     </button>
   `;
 }
@@ -240,6 +329,9 @@ function createCartOverviewItem(entry) {
 function createCartItem(item, index) {
   const product = getProductById(item.productId);
   const size = getSizeById(item.sizeId);
+  const configuredInventory = getSizeInventoryValue(product, size.id);
+  const canIncrease = configuredInventory === null || item.quantity < configuredInventory;
+  const addButtonDisabled = canIncrease ? "" : " disabled";
 
   return `
     <article class="cart-item">
@@ -266,6 +358,7 @@ function createCartItem(item, index) {
             type="button"
             data-change-cart-item="${index}"
             data-change-cart-amount="1"
+            ${addButtonDisabled}
           >
             Adicionar 1
           </button>
@@ -326,19 +419,70 @@ function renderProducts() {
   }
 }
 
-function updateSizeOptions() {
-  const sizeOptions = document.querySelector("[data-size-options]");
-  if (!sizeOptions) {
+function updateAddToCartState(product) {
+  const addToCartButtons = document.querySelectorAll("[data-add-to-cart]");
+  const selectedSize = getSizeById(MODAL_STATE.sizeId);
+  const anyAvailableSize = product ? hasAnyAvailableSize(product) : false;
+  const sizeInventory = product && selectedSize
+    ? getSizeInventoryPresentation(product, selectedSize.id, true)
+    : null;
+  const quantityFitsStock =
+    !sizeInventory || sizeInventory.availableInventory === null || MODAL_STATE.quantity <= sizeInventory.availableInventory;
+
+  let buttonLabel = "Adicionar ao carrinho";
+  let buttonDisabled = !product || !selectedSize || !sizeInventory || !sizeInventory.isAvailable || !quantityFitsStock;
+
+  if (!anyAvailableSize) {
+    buttonLabel = "Sem estoque neste sabor";
+  } else if (sizeInventory && !sizeInventory.isAvailable) {
+    buttonLabel = "Tamanho indisponivel";
+  } else if (sizeInventory && sizeInventory.availableInventory !== null && !quantityFitsStock) {
+    buttonLabel =
+      sizeInventory.availableInventory === 1
+        ? "Resta 1 unidade"
+        : `Restam ${sizeInventory.availableInventory} unidades`;
+  }
+
+  addToCartButtons.forEach((button) => {
+    button.disabled = buttonDisabled;
+    button.textContent = buttonLabel;
+  });
+}
+
+function updateModalStockList(product) {
+  const modalStockList = document.querySelector("[data-modal-stock-list]");
+  if (!modalStockList || !product) {
     return;
   }
 
-  sizeOptions.innerHTML = SIZE_OPTIONS.map(createSizeOption).join("");
+  modalStockList.innerHTML = createSizeAvailabilityMarkup(product, true);
+}
+
+function updateSizeOptions() {
+  const sizeOptions = document.querySelector("[data-size-options]");
+  const product = getProductById(MODAL_STATE.productId);
+
+  if (!sizeOptions || !product) {
+    return;
+  }
+
+  if (!getSizeInventoryPresentation(product, MODAL_STATE.sizeId, true).isAvailable) {
+    MODAL_STATE.sizeId = getFirstAvailableSizeId(product);
+  }
+
+  sizeOptions.innerHTML = SIZE_OPTIONS.map((size) => createSizeOption(product, size)).join("");
+  updateAddToCartState(product);
 }
 
 function updateQuantityDisplay() {
   document.querySelectorAll("[data-quantity-value]").forEach((element) => {
     element.textContent = String(MODAL_STATE.quantity);
   });
+
+  const currentProduct = getProductById(MODAL_STATE.productId);
+  if (currentProduct) {
+    updateAddToCartState(currentProduct);
+  }
 }
 
 function setModalFeedback(message = "") {
@@ -395,18 +539,22 @@ function openModal(product) {
   }
 
   MODAL_STATE.productId = product.id;
-  MODAL_STATE.sizeId = SIZE_OPTIONS[0].id;
+  MODAL_STATE.sizeId = getFirstAvailableSizeId(product);
   MODAL_STATE.quantity = 1;
 
   const modalTitle = modal.querySelector("[data-modal-title]");
   const modalBadge = modal.querySelector("[data-modal-badge]");
   const modalFlavor = modal.querySelector("[data-modal-flavor]");
+  const modalStockList = modal.querySelector("[data-modal-stock-list]");
   const modalDescription = modal.querySelector("[data-modal-description]");
   const modalImage = modal.querySelector("[data-modal-image]");
 
   modalTitle.textContent = product.name;
   modalBadge.textContent = product.badge;
   modalFlavor.textContent = product.flavor;
+  if (modalStockList) {
+    modalStockList.innerHTML = createSizeAvailabilityMarkup(product, true);
+  }
   modalDescription.textContent = product.description;
   modalImage.src = product.image;
   modalImage.alt = product.name;
@@ -496,6 +644,19 @@ function updateCartUI() {
   document.querySelectorAll("[data-clear-cart]").forEach((button) => {
     button.disabled = isEmpty;
   });
+
+  const modal = getProductModal();
+  if (modal && !modal.hidden && MODAL_STATE.productId) {
+    const modalProduct = getProductById(MODAL_STATE.productId);
+
+    if (!modalProduct) {
+      closeModal();
+      return;
+    }
+
+    updateModalStockList(modalProduct);
+    updateSizeOptions();
+  }
 }
 
 function addCurrentProductToCart() {
@@ -503,6 +664,21 @@ function addCurrentProductToCart() {
   const size = getSizeById(MODAL_STATE.sizeId);
 
   if (!product || !size) {
+    return;
+  }
+
+  const sizeInventory = getSizeInventoryPresentation(product, size.id, true);
+  if (!sizeInventory.isAvailable) {
+    setModalFeedback(`${product.name} nao esta disponivel em ${size.weight} no momento.`);
+    updateSizeOptions();
+    return;
+  }
+
+  if (sizeInventory.availableInventory !== null && MODAL_STATE.quantity > sizeInventory.availableInventory) {
+    const unitsLabel =
+      sizeInventory.availableInventory === 1 ? "1 unidade" : `${sizeInventory.availableInventory} unidades`;
+    setModalFeedback(`No momento restam ${unitsLabel} de ${product.name} em ${size.weight}.`);
+    updateAddToCartState(product);
     return;
   }
 
@@ -542,6 +718,15 @@ function removeCartItem(index) {
 function changeCartItemQuantity(index, amount) {
   if (index < 0 || index >= cart.length) {
     return;
+  }
+
+  if (amount > 0) {
+    const product = getProductById(cart[index].productId);
+    const configuredInventory = product ? getSizeInventoryValue(product, cart[index].sizeId) : null;
+
+    if (configuredInventory !== null && cart[index].quantity >= configuredInventory) {
+      return;
+    }
   }
 
   const nextQuantity = cart[index].quantity + amount;
@@ -627,6 +812,7 @@ function initEvents() {
     if (sizeButton) {
       MODAL_STATE.sizeId = sizeButton.dataset.sizeOption;
       updateSizeOptions();
+      setModalFeedback("");
       return;
     }
 
@@ -636,6 +822,7 @@ function initEvents() {
         MODAL_STATE.quantity + Number.parseInt(quantityButton.dataset.quantityChange, 10)
       );
       updateQuantityDisplay();
+      setModalFeedback("");
       return;
     }
 

@@ -12,8 +12,8 @@
     href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Manrope:wght@400;700;800&display=swap"
     rel="stylesheet"
   >
-  <link rel="stylesheet" href="styles.css?v=20260501-1">
-  <link rel="stylesheet" href="admin.css?v=20260501-1">
+  <link rel="stylesheet" href="styles.css?v=20260503-2">
+  <link rel="stylesheet" href="admin.css?v=20260503-2">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -106,12 +106,30 @@
                 <span>Selo pequeno</span>
                 <input type="text" name="badge" placeholder="Ex.: Chocolate">
               </label>
-
-              <label class="admin-field">
-                <span>Disponiveis</span>
-                <input type="number" name="inventory" min="0" placeholder="Ex.: 20">
-              </label>
             </div>
+
+            <fieldset class="admin-stock-group">
+              <legend>Disponibilidade por tamanho</legend>
+              <div class="admin-form-row admin-stock-row">
+                <label class="admin-field">
+                  <span>500 gramas</span>
+                  <input type="number" name="inventoryGrande" min="0" placeholder="Ex.: 8">
+                </label>
+
+                <label class="admin-field">
+                  <span>250 gramas</span>
+                  <input type="number" name="inventoryMedio" min="0" placeholder="Ex.: 12">
+                </label>
+
+                <label class="admin-field">
+                  <span>125 gramas</span>
+                  <input type="number" name="inventoryPequeno" min="0" placeholder="Ex.: 20">
+                </label>
+              </div>
+              <p class="admin-note">
+                Deixe em branco quando quiser mostrar como sob consulta. Use 0 quando aquele tamanho acabou.
+              </p>
+            </fieldset>
 
             <label class="admin-field">
               <span>Texto curto do sabor</span>
@@ -172,8 +190,8 @@
     </main>
   </div>
 
-  <script src="app-config.js"></script>
-  <script src="trindade-store.js"></script>
-  <script src="admin.js?v=20260501-1"></script>
+  <script src="app-config.js?v=20260503-2"></script>
+  <script src="trindade-store.js?v=20260503-2"></script>
+  <script src="admin.js?v=20260503-2"></script>
 </body>
 </html>

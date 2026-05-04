@@ -6,6 +6,7 @@
     dashboard: "biscoitos-trindade-dashboard",
     adminSession: "biscoitos-trindade-admin-session"
   };
+  const PRODUCT_SIZE_KEYS = ["grande", "medio", "pequeno"];
 
   const DEFAULT_PRODUCTS = [
     {
@@ -116,6 +117,57 @@
     return Number.isNaN(parsedValue) ? null : Math.max(0, parsedValue);
   }
 
+  function createEmptyInventoryBySize() {
+    return {
+      grande: null,
+      medio: null,
+      pequeno: null
+    };
+  }
+
+  function normalizeInventoryBySize(value, legacyInventory) {
+    const emptyInventory = createEmptyInventoryBySize();
+
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      const normalizedLegacyInventory = normalizeInventory(legacyInventory);
+
+      if (normalizedLegacyInventory === 0) {
+        return {
+          grande: 0,
+          medio: 0,
+          pequeno: 0
+        };
+      }
+
+      return emptyInventory;
+    }
+
+    PRODUCT_SIZE_KEYS.forEach((sizeKey) => {
+      emptyInventory[sizeKey] = normalizeInventory(value[sizeKey]);
+    });
+
+    return emptyInventory;
+  }
+
+  function getTotalInventory(inventoryBySize) {
+    const normalizedEntries = PRODUCT_SIZE_KEYS.map((sizeKey) => inventoryBySize[sizeKey]);
+    const hasKnownInventory = normalizedEntries.some((value) => value !== null);
+
+    if (!hasKnownInventory) {
+      return null;
+    }
+
+    return normalizedEntries.reduce((total, value) => total + (value || 0), 0);
+  }
+
+  function isProductWithoutStock(product) {
+    if (!product || !product.inventoryBySize) {
+      return false;
+    }
+
+    return PRODUCT_SIZE_KEYS.every((sizeKey) => product.inventoryBySize[sizeKey] === 0);
+  }
+
   function normalizeBoolean(value) {
     if (typeof value === "string") {
       const normalizedValue = value.trim().toLowerCase();
@@ -146,6 +198,8 @@
     const image = String(product.image || "").trim();
     const productId = String(product.id || fallbackId || slugify(name) || `produto-${Date.now()}`).trim();
 
+    const inventoryBySize = normalizeInventoryBySize(product.inventoryBySize, product.inventory);
+
     return {
       id: productId,
       name,
@@ -154,7 +208,8 @@
       description,
       image,
       hidden: normalizeBoolean(product.hidden),
-      inventory: normalizeInventory(product.inventory),
+      inventory: getTotalInventory(inventoryBySize),
+      inventoryBySize,
       createdAt: product.createdAt || nowIso(),
       updatedAt: product.updatedAt || nowIso()
     };
@@ -317,7 +372,7 @@
       totalProducts: products.length,
       visibleProducts: products.filter((product) => !product.hidden).length,
       hiddenProducts: products.filter((product) => product.hidden).length,
-      productsWithoutStock: products.filter((product) => product.inventory === 0).length,
+      productsWithoutStock: products.filter(isProductWithoutStock).length,
       totalOrders: dashboard.totalOrders,
       totalItemsOrdered: dashboard.totalItemsOrdered,
       lastOrderAt: dashboard.lastOrderAt

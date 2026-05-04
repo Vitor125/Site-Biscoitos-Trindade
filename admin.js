@@ -1,4 +1,9 @@
-const ADMIN_ASSET_VERSION = "20260501-1";
+const ADMIN_ASSET_VERSION = "20260503-2";
+const ADMIN_SIZE_OPTIONS = [
+  { id: "grande", label: "500g" },
+  { id: "medio", label: "250g" },
+  { id: "pequeno", label: "125g" }
+];
 
 const loginScreen = document.querySelector("[data-admin-login-screen]");
 const loginForm = document.querySelector("[data-admin-login-form]");
@@ -77,6 +82,26 @@ function getProducts() {
   return window.TrindadeStore.getProducts();
 }
 
+function getSizeInventoryValue(product, sizeId) {
+  const rawValue = product && product.inventoryBySize ? product.inventoryBySize[sizeId] : null;
+  return Number.isInteger(rawValue) ? rawValue : rawValue === 0 ? 0 : null;
+}
+
+function buildInventoryBadges(product) {
+  return ADMIN_SIZE_OPTIONS.map((size) => {
+    const value = getSizeInventoryValue(product, size.id);
+    const badgeLabel =
+      value === null
+        ? `${size.label}: sob consulta`
+        : value === 0
+          ? `${size.label}: indisponivel`
+          : `${size.label}: ${value} disponivel(is)`;
+    const modifierClass = value === 0 ? " is-empty" : value === null ? " is-neutral" : "";
+
+    return `<span class="admin-status-badge${modifierClass}">${badgeLabel}</span>`;
+  }).join("");
+}
+
 function updateMetrics() {
   const metrics = window.TrindadeStore.getDashboardMetrics();
   const hiddenOrNoStock = metrics.hiddenProducts + metrics.productsWithoutStock;
@@ -88,8 +113,6 @@ function updateMetrics() {
 }
 
 function buildProductCard(product) {
-  const inventoryLabel =
-    product.inventory === null ? "Estoque nao informado" : `${product.inventory} disponivel(is)`;
   const visibilityLabel = product.hidden ? "Oculto no catalogo" : "Visivel no catalogo";
   const toggleLabel = product.hidden ? "Desocultar" : "Ocultar";
 
@@ -104,7 +127,7 @@ function buildProductCard(product) {
         <small>${product.flavor}</small>
         <div class="admin-status-row">
           <span class="admin-status-badge${product.hidden ? " is-hidden" : ""}">${visibilityLabel}</span>
-          <span class="admin-status-badge">${inventoryLabel}</span>
+          ${buildInventoryBadges(product)}
         </div>
       </div>
 
@@ -169,6 +192,9 @@ function resetForm() {
   productForm.reset();
   productForm.elements.productId.value = "";
   productForm.elements.currentImage.value = "";
+  productForm.elements.inventoryGrande.value = "";
+  productForm.elements.inventoryMedio.value = "";
+  productForm.elements.inventoryPequeno.value = "";
   updateImagePreview("");
   setFormFeedback("");
 }
@@ -185,7 +211,12 @@ function fillForm(productId) {
   productForm.elements.badge.value = product.badge || "";
   productForm.elements.flavor.value = product.flavor || "";
   productForm.elements.description.value = product.description || "";
-  productForm.elements.inventory.value = product.inventory === null ? "" : String(product.inventory);
+  productForm.elements.inventoryGrande.value =
+    product.inventoryBySize && product.inventoryBySize.grande !== null ? String(product.inventoryBySize.grande) : "";
+  productForm.elements.inventoryMedio.value =
+    product.inventoryBySize && product.inventoryBySize.medio !== null ? String(product.inventoryBySize.medio) : "";
+  productForm.elements.inventoryPequeno.value =
+    product.inventoryBySize && product.inventoryBySize.pequeno !== null ? String(product.inventoryBySize.pequeno) : "";
   productForm.elements.imageUrl.value = /^(data:|https?:)/i.test(product.image) ? product.image : "";
   productForm.elements.hidden.checked = Boolean(product.hidden);
   updateImagePreview(buildAdminAssetPath(product.image, product.updatedAt));
@@ -270,7 +301,11 @@ async function handleProductSubmit(event) {
       flavor: productForm.elements.flavor.value.trim(),
       description: productForm.elements.description.value.trim(),
       image,
-      inventory: productForm.elements.inventory.value.trim(),
+      inventoryBySize: {
+        grande: productForm.elements.inventoryGrande.value.trim(),
+        medio: productForm.elements.inventoryMedio.value.trim(),
+        pequeno: productForm.elements.inventoryPequeno.value.trim()
+      },
       hidden: productForm.elements.hidden.checked
     });
 
