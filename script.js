@@ -7,7 +7,7 @@ const STORE = {
   genericMessage: "Ola! Vim pelo site da Biscoitos Trindade e quero fazer um pedido."
 };
 
-const ASSET_VERSION = "20260503-2";
+const ASSET_VERSION = "20260504-1";
 const CART_STORAGE_KEY = "biscoitos-trindade-cart";
 
 const SIZE_OPTIONS = [
@@ -89,8 +89,8 @@ function getSizeInventoryPresentation(product, sizeId, subtractCartItems = false
 
   if (availableInventory === null) {
     return {
-      text: "Sob consulta",
-      className: " is-unknown",
+      text: "",
+      className: "",
       isAvailable: true,
       availableInventory: null
     };
@@ -135,6 +135,9 @@ function getSizeWeightTag(size) {
 function createSizeAvailabilityMarkup(product, subtractCartItems = false) {
   return SIZE_OPTIONS.map((size) => {
     const inventory = getSizeInventoryPresentation(product, size.id, subtractCartItems);
+    if (inventory.availableInventory === null) {
+      return "";
+    }
 
     return `
       <span class="stock-chip${inventory.className}">
@@ -266,6 +269,18 @@ function buildCartMessage() {
 }
 
 function createProductCard(product) {
+  const sizeAvailabilityMarkup = createSizeAvailabilityMarkup(product);
+  const stockGroupMarkup = sizeAvailabilityMarkup
+    ? `
+        <div class="product-stock-group">
+          <span class="product-stock-heading">Disponibilidade por tamanho</span>
+          <div class="product-stock-list">
+            ${sizeAvailabilityMarkup}
+          </div>
+        </div>
+      `
+    : "";
+
   return `
     <button class="product-card" type="button" data-product-id="${product.id}">
       <div class="product-media">
@@ -278,12 +293,7 @@ function createProductCard(product) {
         </div>
         <h3 class="product-title">${product.name}</h3>
         <p>${product.flavor}</p>
-        <div class="product-stock-group">
-          <span class="product-stock-heading">Disponibilidade por tamanho</span>
-          <div class="product-stock-list">
-            ${createSizeAvailabilityMarkup(product)}
-          </div>
-        </div>
+        ${stockGroupMarkup}
       </div>
     </button>
   `;
@@ -299,7 +309,7 @@ function createSizeOption(product, size) {
     <button class="size-option${selectedClass}${unavailableClass}" type="button" data-size-option="${size.id}"${disabledAttribute}>
       <strong>${size.label}</strong>
       <span>${size.weight}</span>
-      <small class="size-option-stock${inventory.className}">${inventory.text}</small>
+      ${inventory.text ? `<small class="size-option-stock${inventory.className}">${inventory.text}</small>` : ""}
     </button>
   `;
 }
@@ -455,7 +465,9 @@ function updateModalStockList(product) {
     return;
   }
 
-  modalStockList.innerHTML = createSizeAvailabilityMarkup(product, true);
+  const sizeAvailabilityMarkup = createSizeAvailabilityMarkup(product, true);
+  modalStockList.innerHTML = sizeAvailabilityMarkup;
+  modalStockList.hidden = !sizeAvailabilityMarkup;
 }
 
 function updateSizeOptions() {
@@ -548,12 +560,14 @@ function openModal(product) {
   const modalStockList = modal.querySelector("[data-modal-stock-list]");
   const modalDescription = modal.querySelector("[data-modal-description]");
   const modalImage = modal.querySelector("[data-modal-image]");
+  const sizeAvailabilityMarkup = createSizeAvailabilityMarkup(product, true);
 
   modalTitle.textContent = product.name;
   modalBadge.textContent = product.badge;
   modalFlavor.textContent = product.flavor;
   if (modalStockList) {
-    modalStockList.innerHTML = createSizeAvailabilityMarkup(product, true);
+    modalStockList.innerHTML = sizeAvailabilityMarkup;
+    modalStockList.hidden = !sizeAvailabilityMarkup;
   }
   modalDescription.textContent = product.description;
   modalImage.src = product.image;

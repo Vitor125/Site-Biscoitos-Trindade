@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260503-2";
+const ADMIN_ASSET_VERSION = "20260504-1";
 const ADMIN_SIZE_OPTIONS = [
   { id: "grande", label: "500g" },
   { id: "medio", label: "250g" },
@@ -92,7 +92,7 @@ function buildInventoryBadges(product) {
     const value = getSizeInventoryValue(product, size.id);
     const badgeLabel =
       value === null
-        ? `${size.label}: sob consulta`
+        ? `${size.label}: nao informado`
         : value === 0
           ? `${size.label}: indisponivel`
           : `${size.label}: ${value} disponivel(is)`;
