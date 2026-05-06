@@ -221,7 +221,7 @@
 
   function ensureProductsSeeded() {
     const savedProducts = readJSON(STORAGE_KEYS.products, null);
-    if (Array.isArray(savedProducts) && savedProducts.length) {
+    if (savedProducts && Array.isArray(savedProducts) && savedProducts.length > 0) {
       return;
     }
 
