@@ -240,9 +240,23 @@
   function getProducts(includeHidden) {
     ensureProductsSeeded();
 
-    const normalizedProducts = readJSON(STORAGE_KEYS.products, [])
+    const savedProducts = readJSON(STORAGE_KEYS.products, []);
+    const normalizedProducts = savedProducts
       .map((product) => normalizeProduct(product, product.id))
       .filter(Boolean);
+
+    if (Array.isArray(savedProducts) && savedProducts.length && !normalizedProducts.length) {
+      const fallbackProducts = getDefaultProducts();
+      writeJSON(STORAGE_KEYS.products, fallbackProducts);
+
+      return includeHidden
+        ? fallbackProducts
+        : fallbackProducts.filter((product) => !product.hidden);
+    }
+
+    if (JSON.stringify(savedProducts) !== JSON.stringify(normalizedProducts)) {
+      writeJSON(STORAGE_KEYS.products, normalizedProducts);
+    }
 
     if (includeHidden) {
       return normalizedProducts;

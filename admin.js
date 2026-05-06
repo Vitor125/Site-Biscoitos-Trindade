@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260504-1";
+const ADMIN_ASSET_VERSION = "20260506-1";
 const ADMIN_SIZE_OPTIONS = [
   { id: "grande", label: "500g" },
   { id: "medio", label: "250g" },
@@ -282,6 +282,14 @@ function renderDashboard() {
   renderOrders();
 }
 
+function refreshDashboardIfVisible() {
+  if (!window.TrindadeStore || !window.TrindadeStore.hasAdminSession()) {
+    return;
+  }
+
+  renderDashboard();
+}
+
 async function handleProductSubmit(event) {
   event.preventDefault();
   setFormFeedback("Salvando...");
@@ -397,6 +405,13 @@ function initDashboard() {
 
   window.addEventListener("trindade:products-updated", renderDashboard);
   window.addEventListener("trindade:dashboard-updated", renderDashboard);
+  window.addEventListener("focus", refreshDashboardIfVisible);
+  window.addEventListener("pageshow", refreshDashboardIfVisible);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      refreshDashboardIfVisible();
+    }
+  });
 
   initImagePreviewHandlers();
 
